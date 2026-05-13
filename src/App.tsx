@@ -2,15 +2,58 @@ import {
   Download, TerminalSquare, Cpu, Server, Code2, Network, Router,
   GraduationCap, Mail, Share2, Phone, ArrowDown
 } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, useMotionValue, useSpring } from 'motion/react';
+import { useEffect } from 'react';
+import { MatrixRain } from './components/MatrixRain';
 
 export default function App() {
+  const mouseX = useMotionValue(-1000);
+  const mouseY = useMotionValue(-1000);
+  const bgX = useMotionValue(0);
+  const bgY = useMotionValue(0);
+  
+  const springX = useSpring(mouseX, { stiffness: 50, damping: 20 });
+  const springY = useSpring(mouseY, { stiffness: 50, damping: 20 });
+  const bgSpringX = useSpring(bgX, { stiffness: 20, damping: 10 });
+  const bgSpringY = useSpring(bgY, { stiffness: 20, damping: 10 });
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      // Create a 600x600 glow centered on the cursor
+      mouseX.set(e.clientX - 300); 
+      mouseY.set(e.clientY - 300);
+      
+      // Slight parallax shift for the background grid
+      bgX.set((e.clientX / window.innerWidth - 0.5) * 40);
+      bgY.set((e.clientY / window.innerHeight - 0.5) * 40);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [mouseX, mouseY, bgX, bgY]);
+
   return (
     <div className="text-on-surface font-body-md antialiased min-h-screen flex flex-col relative overflow-x-hidden">
       {/* Background Elements */}
-      <div className="fixed inset-0 cyber-grid -z-20"></div>
-      <div className="fixed inset-0 scanline-overlay -z-10"></div>
-      <div className="fixed top-0 left-0 w-full h-1 bg-cyber-cyan animate-pulse -z-10 shadow-[0_0_20px_#00f3ff]"></div>
+      <MatrixRain />
+      <motion.div 
+        className="fixed inset-[-50px] cyber-grid -z-20 pointer-events-none"
+        style={{ x: bgSpringX, y: bgSpringY }}
+      ></motion.div>
+      
+      {/* Interactive Cursor Glow */}
+      <motion.div
+        className="fixed top-0 left-0 w-[600px] h-[600px] rounded-full pointer-events-none -z-[15]"
+        style={{
+          x: springX,
+          y: springY,
+          background: "radial-gradient(circle, rgba(0, 243, 255, 0.08) 0%, rgba(188, 19, 254, 0.03) 40%, transparent 60%)",
+          filter: "blur(30px)"
+        }}
+      />
+      
+      <div className="fixed inset-0 scanline-overlay -z-10 pointer-events-none"></div>
+      <div className="fixed top-0 left-0 w-full h-1 bg-cyber-cyan animate-pulse z-50 shadow-[0_0_20px_#00f3ff]"></div>
 
       {/* TopNavBar */}
       <nav className="sticky top-0 w-full z-50 bg-cyber-dark/80 backdrop-blur-md border-b border-cyber-cyan/30 shadow-[0_0_20px_rgba(0,243,255,0.1)]">
@@ -130,7 +173,7 @@ export default function App() {
             <div className="flex items-center justify-between border-b border-cyber-cyan/30 pb-4 mb-6">
               <div className="flex items-center gap-4">
                 <TerminalSquare className="text-cyber-cyan w-6 h-6" />
-                <h2 className="font-headline-lg text-2xl md:text-3xl text-white font-bold tracking-tight">cat profil.sh</h2>
+                <h2 className="font-headline-lg text-2xl md:text-3xl text-white font-bold tracking-tight glitch-text" data-text="cat profil.sh">cat profil.sh</h2>
               </div>
               <span className="font-code-sm text-[10px] text-cyber-cyan/50 px-2 py-1 border border-cyber-cyan/30">READ_ONLY</span>
             </div>
@@ -155,7 +198,7 @@ export default function App() {
           className="w-full relative" id="stack">
           <div className="flex flex-col mb-12 relative">
             <h2 className="font-display-lg text-[32px] md:text-[48px] font-black text-white uppercase tracking-tighter flex items-center gap-4">
-              <span className="text-cyber-purple">01.</span> TECH_MATRIX
+              <span className="text-cyber-purple">01.</span> <span className="glitch-text" data-text="TECH_MATRIX">TECH_MATRIX</span>
             </h2>
             <div className="h-[1px] w-full bg-gradient-to-r from-cyber-purple via-cyber-cyan/20 to-transparent mt-4"></div>
           </div>
@@ -231,7 +274,7 @@ export default function App() {
           className="w-full" id="projects">
           <div className="flex flex-col mb-12 relative">
             <h2 className="font-display-lg text-[32px] md:text-[48px] font-black text-white uppercase tracking-tighter flex items-center gap-4">
-              <span className="text-cyber-cyan">02.</span> ACTIVE_NODES
+              <span className="text-cyber-cyan">02.</span> <span className="glitch-text" data-text="ACTIVE_NODES">ACTIVE_NODES</span>
             </h2>
             <div className="h-[1px] w-full bg-gradient-to-r from-cyber-cyan via-cyber-purple/20 to-transparent mt-4"></div>
           </div>
@@ -345,7 +388,7 @@ export default function App() {
           className="w-full" id="timeline">
           <div className="flex flex-col mb-12 relative">
             <h2 className="font-display-lg text-[32px] md:text-[48px] font-black text-white uppercase tracking-tighter flex items-center gap-4">
-              <span className="text-cyber-purple">03.</span> EXEC_LOGS
+              <span className="text-cyber-purple">03.</span> <span className="glitch-text" data-text="EXEC_LOGS">EXEC_LOGS</span>
             </h2>
             <div className="h-[1px] w-full bg-gradient-to-r from-cyber-purple via-cyber-cyan/20 to-transparent mt-4"></div>
           </div>
@@ -440,7 +483,7 @@ export default function App() {
           <div className="terminal-window p-8 border-t-4 border-t-cyber-cyan border-b-4 border-b-cyber-purple">
             <div className="flex items-center gap-4 mb-8 border-b border-cyber-cyan/20 pb-4">
               <GraduationCap className="w-6 h-6 text-cyber-cyan" />
-              <h2 className="font-code-sm text-lg font-bold text-white tracking-widest uppercase">SYS.BASE_FORMATION</h2>
+              <h2 className="font-code-sm text-lg font-bold text-white tracking-widest uppercase glitch-text" data-text="SYS.BASE_FORMATION">SYS.BASE_FORMATION</h2>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 divide-y md:divide-y-0 md:divide-x divide-cyber-cyan/20">
@@ -491,7 +534,7 @@ export default function App() {
             </div>
             
             <h2 className="font-display-lg text-[40px] md:text-[64px] font-black text-white mb-6 uppercase tracking-tighter">
-              INITIATE_<span className="text-cyber-cyan">HANDSHAKE</span>
+              <span className="glitch-text" data-text="INITIATE_">INITIATE_</span><span className="text-cyber-cyan glitch-text" data-text="HANDSHAKE">HANDSHAKE</span>
             </h2>
             
             <p className="font-code-sm text-sm text-on-surface-variant max-w-xl mx-auto mb-10 border-l border-r border-cyber-cyan/30 px-4">
@@ -532,7 +575,7 @@ export default function App() {
       <footer className="w-full py-8 bg-cyber-dark border-t border-cyber-cyan/30 relative z-20">
         <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="font-code-sm text-xs text-cyber-cyan/70 flex items-center gap-2">
-            <span className="text-cyber-purple">&gt;</span> © 2024 NY_AINA <span className="text-cyber-cyan mx-2">//</span> ROOT ACCESS GRANTED
+            <span className="text-cyber-purple">&gt;</span> © 2026 NY_AINA <span className="text-cyber-cyan mx-2">//</span> ROOT ACCESS GRANTED
           </div>
           <div className="flex space-x-6 font-code-sm text-[10px] uppercase tracking-widest">
             <a className="text-on-surface-variant hover:text-cyber-cyan transition-colors duration-200" href="#">GitHub</a>
