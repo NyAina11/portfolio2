@@ -1,11 +1,14 @@
 import {useEffect, useRef, useState} from 'react';
 import {MotionConfig} from 'motion/react';
+import 'lenis/dist/lenis.css';
 import {sections} from './content';
 import {useTheme} from './lib/hooks';
+import {useSmoothScroll} from './lib/scroll';
 import {Contact} from './components/Contact';
 import {Hero} from './components/Hero';
 import {Journey} from './components/Journey';
 import {Nav} from './components/Nav';
+import {Playground} from './components/Playground';
 import {Profile} from './components/Profile';
 import {Projects} from './components/Projects';
 import {Skills} from './components/Skills';
@@ -98,27 +101,30 @@ function useActiveSection(): string | null {
 export default function App() {
   const {theme, toggle} = useTheme();
   const active = useActiveSection();
+  useSmoothScroll();
 
   return (
     <MotionConfig reducedMotion="user">
       <a
-        href="#profil"
+        href="#demo"
         className="btn btn-primary btn-sm fixed top-3 left-3 z-[60] -translate-y-20 focus-visible:translate-y-0"
       >
         Aller au contenu
       </a>
       <Nav active={active} theme={theme} onToggleTheme={toggle} />
-      <div className="canvas">
-        <CanvasGlow />
-        <main className="relative">
-          <Hero />
+      <main>
+        <Hero />
+        {/* La suite de la page est une feuille qui glisse par-dessus le hero épinglé. */}
+        <div className="sheet canvas">
+          <CanvasGlow />
+          <Playground />
           <Profile />
           <Skills />
           <Projects />
           <Journey />
           <Contact />
-        </main>
-      </div>
+        </div>
+      </main>
     </MotionConfig>
   );
 }

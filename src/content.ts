@@ -35,13 +35,30 @@ export const identity = {
   cv: null as string | null,
 };
 
+/** Texte du hero, sous le nom. */
+export const hero = {
+  note: 'Aina signifie « la vie » en malgache. Ce fond est un jeu de la vie : chaque point naît, vit et meurt selon ses voisins.',
+  noteMouse: 'Déplacez la souris pour en semer.',
+  noteTouch: 'Touchez l’écran pour en semer.',
+};
+
+/** Sections de la page, dans l'ordre. Celles marquées `nav` apparaissent dans la navigation. */
 export const sections = [
-  { id: 'profil', label: 'Profil' },
-  { id: 'competences', label: 'Compétences' },
-  { id: 'projets', label: 'Projets' },
-  { id: 'parcours', label: 'Parcours' },
-  { id: 'contact', label: 'Contact' },
+  { id: 'demo', label: 'En action', nav: false },
+  { id: 'profil', label: 'Profil', nav: true },
+  { id: 'competences', label: 'Compétences', nav: true },
+  { id: 'projets', label: 'Projets', nav: true },
+  { id: 'parcours', label: 'Parcours', nav: true },
+  { id: 'contact', label: 'Contact', nav: false },
 ] as const;
+
+export type SectionId = (typeof sections)[number]['id'];
+
+export const demo = {
+  title: 'En action',
+  intro:
+    'Trois systèmes que j’ai construits, rejoués dans votre navigateur. Choisissez-en un, lancez-le, déplacez ses nœuds.',
+};
 
 /* ------------------------------------------------------------------ */
 /* Profil                                                              */
@@ -219,6 +236,8 @@ export interface FeaturedProject {
   layers: StackLayer[];
   /** Ce qui enveloppe la stack (hébergement, orchestration). */
   wrap?: string;
+  /** Couleur du panneau. */
+  pop: 'teal' | 'lilac' | 'yellow' | 'orange' | 'cream';
 }
 
 export interface SmallProject {
@@ -233,6 +252,7 @@ export interface SmallProject {
 export const featuredProjects: FeaturedProject[] = [
   {
     id: 'k3s-mobile',
+    pop: 'teal',
     title: 'Déployer sur Kubernetes depuis son téléphone',
     context: '2026, projet de Licence 3 à l’ENI Fianarantsoa',
     summary:
@@ -254,6 +274,7 @@ export const featuredProjects: FeaturedProject[] = [
   },
   {
     id: 'cicd',
+    pop: 'lilac',
     title: 'Une plateforme CI/CD qui montre ce qu’elle fait',
     context: '2026, projet DevOps',
     summary:
@@ -275,6 +296,7 @@ export const featuredProjects: FeaturedProject[] = [
   },
   {
     id: 'ascf',
+    pop: 'yellow',
     title: 'ASCF, le suivi des contributions fiscales',
     context: '2025, stage de trois mois au Service Régional des Entreprises',
     summary:
@@ -296,6 +318,7 @@ export const featuredProjects: FeaturedProject[] = [
   },
   {
     id: 'automatisations',
+    pop: 'orange',
     title: 'Des agents IA qui travaillent sans moi',
     context: 'Depuis 2025, missions freelance',
     summary:
@@ -317,6 +340,7 @@ export const featuredProjects: FeaturedProject[] = [
   },
   {
     id: 'processiq',
+    pop: 'cream',
     title: 'ProcessIQ, l’ERP d’une école',
     context: '2026, projet en équipe',
     summary:
@@ -544,6 +568,6 @@ export const journey: JourneyItem[] = [
 /* ------------------------------------------------------------------ */
 
 export const contact = {
-  title: 'Un workflow à automatiser, une application à mettre en production ?',
+  title: 'Une idée à mettre en production ?',
   text: 'Écrivez-moi quelques lignes sur votre besoin : ce qui existe déjà, ce qui vous fait perdre du temps, et où vous voulez arriver.',
 };

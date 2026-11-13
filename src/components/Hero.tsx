@@ -1,9 +1,11 @@
-import {useEffect, useState} from 'react';
-import {motion, useReducedMotion} from 'motion/react';
-import {ArrowDown, Download} from 'lucide-react';
-import {identity} from '../content';
+import {useEffect, useRef, useState} from 'react';
+import {motion, useMotionValueEvent, useReducedMotion, useScroll, useTransform} from 'motion/react';
+import {ArrowDown, Download, Pause, Play} from 'lucide-react';
+import {hero, identity} from '../content';
+import {useMediaQuery} from '../lib/hooks';
 import {AxisText} from './AxisText';
-import {FlowCanvas} from './FlowCanvas';
+import {LifeField} from './LifeField';
+import {Magnetic} from './Magnetic';
 
 function useLocalTime(timeZone: string) {
   const format = () =>
@@ -19,74 +21,142 @@ function useLocalTime(timeZone: string) {
   return time;
 }
 
+/** Moment où le nom apparaît en lettres nettes, après s'être écrit en cellules vivantes. */
+const NAME_AT = 1.05;
+
 export function Hero() {
   const reduced = useReducedMotion();
+  const finePointer = useMediaQuery('(hover: hover) and (pointer: fine)');
   const time = useLocalTime(identity.timeZone);
+  const heroRef = useRef<HTMLElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const [paused, setPaused] = useState(false);
+  const [covered, setCovered] = useState(false);
+  const [pinned, setPinned] = useState(true);
+
+  // Le hero n'est épinglé que si tout son contenu tient dans la fenêtre :
+  // sur un écran trop court, il défile normalement et rien n'est coupé.
+  useEffect(() => {
+    const inner = innerRef.current;
+    if (!inner) return;
+    const check = () => setPinned(inner.scrollHeight <= window.innerHeight + 1);
+    check();
+    const observer = new ResizeObserver(check);
+    observer.observe(inner);
+    window.addEventListener('resize', check);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', check);
+    };
+  }, []);
+
+  // Épinglé, le hero reste en place pendant que la suite de la page glisse par-dessus.
+  const {scrollY} = useScroll();
+  useMotionValueEvent(scrollY, 'change', (value) =>
+    setCovered(value > (heroRef.current?.offsetHeight ?? window.innerHeight) + 40),
+  );
+  const progress = useTransform(scrollY, (value) => Math.min(1, value / Math.max(1, window.innerHeight)));
+  const scale = useTransform(progress, [0, 1], [1, 0.9]);
+  const opacity = useTransform(progress, [0, 0.85], [1, 0.15]);
+  const y = useTransform(progress, [0, 1], [0, -70]);
 
   const rise = (delay: number) =>
     reduced
       ? {}
       : {
-          initial: {opacity: 0, y: 14},
+          initial: {opacity: 0, y: 16},
           animate: {opacity: 1, y: 0},
-          transition: {duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] as const},
+          transition: {duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] as const},
         };
 
   return (
-    <section id="top" className="shell pt-24 pb-20 md:pt-28 md:pb-28">
-      <div className="grid gap-x-12 gap-y-9 lg:grid-cols-[minmax(0,1fr)_21rem] lg:items-end xl:grid-cols-[minmax(0,1fr)_26rem]">
-        <div className="name-wrap">
-          <h1 className="display h1">
+    <section
+      ref={heroRef}
+      id="top"
+      className="hero"
+      data-pinned={pinned}
+      style={{visibility: covered ? 'hidden' : 'visible'}}
+    >
+      <LifeField
+        className="hero-life"
+        stamp={{target: titleRef, lines: [identity.firstName, identity.lastName]}}
+        paused={paused}
+        asleep={covered}
+      />
+      <div className="hero-veil" aria-hidden="true" />
+
+      <motion.div
+        ref={innerRef}
+        className="shell hero-inner"
+        style={reduced || !pinned ? undefined : {scale, opacity, y}}
+      >
+        <motion.div {...rise(NAME_AT + 0.45)} className="hero-top">
+          <p className="font-medium">{identity.role}</p>
+          <p className="flex items-center gap-2.5">
+            <span className="h-2.5 w-2.5 rounded-full bg-ops" aria-hidden="true" />
+            {identity.availability}
+          </p>
+        </motion.div>
+
+        <div className="name-wrap hero-name">
+          <h1 ref={titleRef} className="display h1">
             <span className="block">
-              <AxisText text={identity.firstName} trigger="mount" delay={0.1} stagger={0.045} />
+              <AxisText text={identity.firstName} trigger="mount" delay={NAME_AT} stagger={0.045} />
             </span>
             <span className="block">
-              <AxisText text={identity.lastName} trigger="mount" delay={0.32} stagger={0.035} />
+              <AxisText text={identity.lastName} trigger="mount" delay={NAME_AT + 0.2} stagger={0.035} />
             </span>
           </h1>
         </div>
 
-        <div className="lg:pb-2 xl:pb-3">
-          <motion.dl {...rise(0.75)} className="flex flex-col gap-y-1 text-[0.95rem]">
-            <div>
-              <dt className="sr-only">Disponibilité</dt>
-              <dd className="flex items-center gap-2.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-ops" aria-hidden="true" />
-                {identity.availability}
-              </dd>
+        <motion.div {...rise(NAME_AT + 0.6)}>
+          <div className="hero-foot">
+            <p className="lead max-w-[38ch]">{identity.pitch}</p>
+            <div className="flex flex-wrap gap-3">
+              <Magnetic>
+                <a href="#projets" className="btn btn-primary">
+                  Voir les projets
+                  <ArrowDown size={17} className="nudge-down" />
+                </a>
+              </Magnetic>
+              <Magnetic>
+                <a href="#contact" className="btn btn-quiet">
+                  Me contacter
+                </a>
+              </Magnetic>
+              {identity.cv && (
+                <a href={identity.cv} className="btn btn-quiet" download>
+                  <Download size={17} />
+                  Télécharger le CV
+                </a>
+              )}
             </div>
-            <div className="pl-5 text-ink-3">
-              <dt className="sr-only">Heure locale</dt>
-              <dd>
-                {identity.location}, <span className="tabular-nums">{time}</span> (UTC+3)
-              </dd>
+          </div>
+
+          <div className="hero-note">
+            <p className="max-w-[62ch]">
+              {hero.note} {!reduced && (finePointer ? hero.noteMouse : hero.noteTouch)}
+            </p>
+            <div className="flex flex-none items-center gap-4">
+              <p className="tag-mono hidden sm:block">
+                {identity.location} <span>{time}</span> UTC+3
+              </p>
+              {!reduced && (
+                <button
+                  type="button"
+                  className="icon-btn"
+                  style={{width: '2.25rem', height: '2.25rem'}}
+                  aria-label={paused ? 'Relancer l’animation de fond' : 'Mettre en pause l’animation de fond'}
+                  title={paused ? 'Relancer l’animation' : 'Mettre en pause'}
+                  onClick={() => setPaused((value) => !value)}
+                >
+                  {paused ? <Play size={14} fill="currentColor" /> : <Pause size={14} fill="currentColor" />}
+                </button>
+              )}
             </div>
-          </motion.dl>
-
-          <motion.p {...rise(0.85)} className="lead mt-6 max-w-[34ch] lg:text-[1.3rem] xl:text-[1.45rem]">
-            {identity.role}. {identity.pitch}
-          </motion.p>
-
-          <motion.div {...rise(0.95)} className="mt-7 flex flex-wrap gap-3">
-            <a href="#projets" className="btn btn-primary">
-              Voir les projets
-              <ArrowDown size={17} className="nudge-down" />
-            </a>
-            <a href="#contact" className="btn btn-quiet">
-              Me contacter
-            </a>
-            {identity.cv && (
-              <a href={identity.cv} className="btn btn-quiet" download>
-                <Download size={17} />
-                Télécharger le CV
-              </a>
-            )}
-          </motion.div>
-        </div>
-      </div>
-
-      <motion.div {...rise(1.05)} className="mt-14 md:mt-16">
-        <FlowCanvas introDelay={reduced ? 0 : 1.15} />
+          </div>
+        </motion.div>
       </motion.div>
     </section>
   );
