@@ -92,15 +92,19 @@ export function LifeField({paused = false, asleep = false, stamp, className}: Li
       }
     };
 
-    /** Écrit le titre dans la grille : chaque cellule sous une lettre devient vivante. */
+    /**
+     * Écrit le titre dans la grille : chaque cellule sous une lettre devient vivante.
+     * Chaque ligne est d'abord mesurée comme le navigateur l'affichera (police, taille,
+     * axes, espacement), puis dessinée à la même largeur et sur la même ligne de base :
+     * les cellules épousent donc les vraies lettres, quelle que soit la police.
+     */
     const stampTitle = (): boolean => {
       const target = stamp?.target.current;
       if (!target || !stamp) return false;
       const box = canvas.getBoundingClientRect();
-      const rect = target.getBoundingClientRect();
       const style = getComputedStyle(target);
       const size = parseFloat(style.fontSize);
-      const lineHeight = parseFloat(style.lineHeight) || size * 0.88;
+      const letterSpacing = parseFloat(style.letterSpacing) || 0;
       const sample = 4;
       const scale = sample / pitch;
 
@@ -109,13 +113,35 @@ export function LifeField({paused = false, asleep = false, stamp, className}: Li
       sheet.height = life.rows * sample;
       const pen = sheet.getContext('2d', {willReadFrequently: true});
       if (!pen) return false;
-      pen.font = `800 condensed ${size * scale}px "Bricolage Grotesque Variable", sans-serif`;
-      pen.textBaseline = 'middle';
+      pen.font = `800 ${size * scale}px "Fraunces Variable", Georgia, serif`;
+      pen.textBaseline = 'alphabetic';
       pen.fillStyle = '#fff';
-      if ('letterSpacing' in pen) pen.letterSpacing = `${-0.012 * size * scale}px`;
-      stamp.lines.forEach((line, index) => {
-        pen.fillText(line, (rect.left - box.left) * scale, (rect.top - box.top + (index + 0.5) * lineHeight) * scale);
+      if ('letterSpacing' in pen) pen.letterSpacing = `${letterSpacing * scale}px`;
+
+      stamp.lines.forEach((text, index) => {
+        const line = target.children[index] as HTMLElement | undefined;
+        if (!line) return;
+
+        // Sonde invisible : mêmes styles que le titre, texte entier sur une ligne, repère de ligne de base.
+        const probe = document.createElement('span');
+        probe.style.cssText = 'position:absolute;left:0;top:0;visibility:hidden;white-space:nowrap;';
+        probe.textContent = text;
+        const mark = document.createElement('i');
+        mark.style.cssText = 'display:inline-block;width:0;height:0;';
+        probe.appendChild(mark);
+        line.appendChild(probe);
+        const probeBox = probe.getBoundingClientRect();
+        const baselineOffset = mark.getBoundingClientRect().bottom - probeBox.top;
+        probe.remove();
+
+        const lineBox = line.getBoundingClientRect();
+        const natural = pen.measureText(text).width;
+        if (natural <= 0 || probeBox.width <= 0) return;
+        const stretch = (probeBox.width * scale) / natural;
+        pen.setTransform(stretch, 0, 0, 1, 0, 0);
+        pen.fillText(text, ((lineBox.left - box.left) * scale) / stretch, (lineBox.top - box.top + baselineOffset) * scale);
       });
+      pen.setTransform(1, 0, 0, 1, 0, 0);
 
       const pixels = pen.getImageData(0, 0, sheet.width, sheet.height).data;
       let count = 0;

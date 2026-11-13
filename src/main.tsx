@@ -1,6 +1,7 @@
 import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
-import '@fontsource-variable/bricolage-grotesque/standard.css';
+import '@fontsource-variable/bricolage-grotesque/wght.css';
+import '@fontsource-variable/fraunces/full.css';
 import '@fontsource-variable/martian-mono/standard.css';
 import './index.css';
 import App from './App.tsx';
