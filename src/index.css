@@ -44,6 +44,18 @@
   --dev: #b9a8ff;
   --net: #f6c64f;
   --shadow: 0 18px 40px -22px rgb(0 0 0 / 0.8);
+  /* Automate cellulaire du hero */
+  --sheet-shadow: 0 -24px 80px -20px rgb(0 0 0 / 0.55);
+  --life-born: #ff6b3d;
+  --life-alive: #5b66dc;
+  --life-ghost: #20265c;
+  /* Aplats des panneaux de projets et du final : identiques dans les deux thèmes */
+  --pop-teal: #34d8c4;
+  --pop-lilac: #b9a8ff;
+  --pop-yellow: #f6c64f;
+  --pop-orange: #ff6b3d;
+  --pop-cream: #f5f0e3;
+  --pop-ink: #0b0e24;
   color-scheme: dark;
 }
 
@@ -64,6 +76,10 @@
   --dev: #5d42d6;
   --net: #8c6206;
   --shadow: 0 18px 36px -24px rgb(15 19 56 / 0.35);
+  --sheet-shadow: 0 -20px 60px -24px rgb(15 19 56 / 0.22);
+  --life-born: #e0522a;
+  --life-alive: #a9b0e6;
+  --life-ghost: #d6daf0;
   color-scheme: light;
 }
 
@@ -72,6 +88,10 @@
 /* ------------------------------------------------------------------ */
 
 @layer base {
+  html.lenis {
+    scroll-behavior: auto;
+  }
+
   html {
     scroll-behavior: smooth;
     scroll-padding-top: 5.5rem;
@@ -100,6 +120,11 @@
     outline: 2px solid var(--accent);
     outline-offset: 3px;
     border-radius: 6px;
+  }
+
+  /* Cible d'un lien d'ancre : elle reçoit le focus sans afficher de contour. */
+  [tabindex="-1"]:focus {
+    outline: none;
   }
 }
 
@@ -168,7 +193,7 @@
     white-space: nowrap;
   }
 
-  /* Le nom remplit sa colonne : sa taille suit la largeur disponible. */
+  /* Le nom remplit la largeur du hero : sa taille suit l'espace disponible. */
   .name-wrap {
     container-type: inline-size;
     min-width: 0;
@@ -182,12 +207,13 @@
 
   @supports (font-size: 1cqw) {
     .h1 {
-      font-size: clamp(3.2rem, min(23.6cqw, 23vh), 11.5rem);
+      font-size: clamp(3.2rem, min(23.9cqw, 26svh), 19rem);
     }
   }
 
   .h2 {
-    font-size: clamp(2.5rem, 6.4vw, 4.75rem);
+    font-size: clamp(3rem, 10vw, 8.5rem);
+    line-height: 0.88;
   }
 
   .h3 {
@@ -338,30 +364,55 @@
   }
 
   /* ------------------------------------------------------------------ */
-  /* Navigation                                                          */
+  /* Navigation : une pilule flottante                                   */
   /* ------------------------------------------------------------------ */
 
   .nav {
     position: fixed;
-    inset: 0 0 auto 0;
+    inset: 0.85rem 0 auto 0;
     z-index: 50;
-    transition: background-color 0.3s, border-color 0.3s, backdrop-filter 0.3s;
-    border-bottom: 1px solid transparent;
+    display: flex;
+    justify-content: center;
+    padding-inline: 0.85rem;
+    pointer-events: none;
   }
 
-  .nav[data-scrolled="true"] {
-    background: color-mix(in oklab, var(--bg) 82%, transparent);
-    -webkit-backdrop-filter: blur(14px) saturate(1.3);
-    backdrop-filter: blur(14px) saturate(1.3);
-    border-bottom-color: var(--line);
+  .nav-bar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    width: 100%;
+    max-width: 46rem;
+    height: 3.5rem;
+    padding: 0 0.5rem 0 1.1rem;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: color-mix(in oklab, var(--surface) 74%, transparent);
+    -webkit-backdrop-filter: blur(18px) saturate(1.5);
+    backdrop-filter: blur(18px) saturate(1.5);
+    box-shadow: 0 16px 40px -24px rgb(0 0 0 / 0.7);
+    overflow: hidden;
+    pointer-events: auto;
+  }
+
+  .nav-progress {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--accent);
+    transform-origin: left;
   }
 
   .nav-link {
     position: relative;
     display: inline-flex;
     align-items: center;
-    height: 2.5rem;
-    padding-inline: 0.85rem;
+    height: 2.4rem;
+    padding-inline: 0.8rem;
     border-radius: 999px;
     font-size: 0.9375rem;
     font-weight: 500;
@@ -378,9 +429,29 @@
     position: absolute;
     inset: 0;
     border-radius: 999px;
-    background: var(--surface);
+    background: var(--raise);
     border: 1px solid var(--line);
     z-index: -1;
+  }
+
+  /* Menu mobile : un rideau qui s'ouvre depuis le bouton. */
+  .menu {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 6.5rem 1.5rem 2rem;
+    background: var(--bg);
+    pointer-events: auto;
+  }
+
+  .menu-link {
+    display: block;
+    padding-block: 0.35rem;
+    font-size: clamp(2.8rem, 13vw, 4.5rem);
+    line-height: 1;
   }
 
   /* ------------------------------------------------------------------ */
@@ -787,17 +858,6 @@
     background: var(--ink-3);
   }
 
-  /* Projet atteint depuis un lien : son titre s'allume un instant. */
-  .project:target .h3,
-  .project-small:target h4 {
-    animation: arrive 1.8s var(--ease-out-quint);
-  }
-
-  @keyframes arrive {
-    0%, 35% { color: var(--accent); }
-    100% { color: inherit; }
-  }
-
   /* ------------------------------------------------------------------ */
   /* Parcours                                                            */
   /* ------------------------------------------------------------------ */
@@ -861,6 +921,464 @@
     font-variation-settings: "wght" 650, "wdth" 82;
     overflow-wrap: anywhere;
     text-decoration-thickness: 2px;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Hero : plein écran, épinglé, recouvert par la suite de la page      */
+  /* ------------------------------------------------------------------ */
+
+  .hero {
+    position: relative;
+    min-height: 100svh;
+    overflow: hidden;
+    background: var(--bg);
+  }
+
+  .hero[data-pinned="true"] {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+  }
+
+  .hero-life {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Voiles haut et bas : la vie reste lisible au centre, le texte en bordure. */
+  .hero-veil {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(to bottom, var(--bg) 0%, transparent 22%),
+      linear-gradient(to top, var(--bg) 4%, color-mix(in oklab, var(--bg) 70%, transparent) 26%, transparent 52%);
+  }
+
+  .hero-inner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 100svh;
+    padding-top: 5.75rem;
+    padding-bottom: 1.5rem;
+    transform-origin: 50% 35%;
+  }
+
+  .hero-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.35rem 2rem;
+    font-size: 0.95rem;
+  }
+
+  .hero-name {
+    margin-block: auto;
+    padding-block: 1.25rem;
+  }
+
+  .hero-foot {
+    display: grid;
+    gap: 1.5rem 3rem;
+    align-items: end;
+  }
+
+  @media (min-width: 56rem) {
+    .hero-foot {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+  }
+
+  .hero-note {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+    font-size: 0.86rem;
+    line-height: 1.4;
+    color: var(--ink-3);
+  }
+
+  .tag-mono {
+    font-family: var(--font-mono);
+    font-stretch: 85%;
+    font-size: 0.74rem;
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Feuille de contenu : elle glisse par-dessus le hero                 */
+  /* ------------------------------------------------------------------ */
+
+  .sheet {
+    position: relative;
+    z-index: 1;
+    border-radius: 2rem 2rem 0 0;
+    background-color: var(--bg);
+    box-shadow: var(--sheet-shadow);
+  }
+
+  @media (min-width: 48rem) {
+    .sheet {
+      border-radius: 3rem 3rem 0 0;
+    }
+  }
+
+  .section {
+    padding-block: 5rem;
+  }
+
+  @media (min-width: 48rem) {
+    .section {
+      padding-block: 8rem;
+    }
+  }
+
+  /* Le bandeau défilant clôt la section : pas besoin d'autant d'air dessous. */
+  .section:has(.marquee) {
+    padding-bottom: 1rem;
+  }
+
+  .sec-head {
+    margin-bottom: 3rem;
+  }
+
+  @media (min-width: 48rem) {
+    .sec-head {
+      margin-bottom: 4.5rem;
+    }
+  }
+
+  .sec-rule {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 0.9rem;
+    margin-bottom: 1.75rem;
+    border-top: 1px solid var(--line);
+    color: var(--ink-3);
+  }
+
+  .sec-grid {
+    display: grid;
+    gap: 1.5rem 3rem;
+    align-items: end;
+  }
+
+  @media (min-width: 64rem) {
+    .sec-grid {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 26rem);
+    }
+  }
+
+  /* Cadre du canevas de démonstration */
+  .stage {
+    padding: 1.25rem;
+    border-radius: 1.75rem;
+    border: 1px solid var(--line);
+    background-color: color-mix(in oklab, var(--surface) 55%, transparent);
+    background-image: radial-gradient(circle at 1px 1px, var(--dot) 1px, transparent 1.5px);
+    background-size: 28px 28px;
+  }
+
+  @media (min-width: 48rem) {
+    .stage {
+      padding: 2.25rem 2.5rem 2rem;
+      border-radius: 2.25rem;
+    }
+  }
+
+  /* Texte qui s'allume mot à mot au défilement */
+  .scrub {
+    font-size: clamp(1.75rem, 4.6vw, 3.9rem);
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    font-variation-settings: "wght" 650, "wdth" 82, "opsz" 96;
+  }
+
+  .scrub-word {
+    display: inline-block;
+    margin-right: 0.24em;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Bandeau défilant                                                    */
+  /* ------------------------------------------------------------------ */
+
+  .marquee {
+    overflow: hidden;
+    padding-block: 0.4rem;
+    white-space: nowrap;
+    user-select: none;
+  }
+
+  .marquee-track {
+    display: inline-flex;
+    will-change: transform;
+  }
+
+  .marquee-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    padding-right: 0.35em;
+    font-size: clamp(2.6rem, 8.5vw, 7.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+    font-variation-settings: "wght" 800, "wdth" 75, "opsz" 96;
+  }
+
+  .marquee-item::after {
+    content: "";
+    width: 0.22em;
+    height: 0.22em;
+    border-radius: 999px;
+    background: var(--c);
+  }
+
+  .marquee[data-outline="true"] .marquee-item {
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--ink-3);
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Projets : panneaux de couleur qui s'empilent                        */
+  /* ------------------------------------------------------------------ */
+
+  .stack-area {
+    --panel-gap: 1.25rem;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--panel-gap);
+  }
+
+  .stack-area[data-stacking="true"] {
+    --panel-h: min(45rem, calc(100svh - 8rem));
+  }
+
+  .stack-area[data-stacking="true"] .panel-slot {
+    position: sticky;
+    top: calc(5.5rem + var(--i) * 0.8rem);
+    height: var(--panel-h);
+  }
+
+  .stack-area[data-stacking="true"] .panel {
+    height: 100%;
+  }
+
+  .stack-anchor {
+    position: absolute;
+    left: 0;
+    top: calc(var(--i) * (var(--panel-h) + var(--panel-gap)));
+  }
+
+  .panel {
+    /* Sur un aplat de couleur, l'encre est toujours indigo, quel que soit le thème. */
+    --bg: var(--pop);
+    --ink: var(--pop-ink);
+    --ink-2: rgb(11 14 36 / 0.84);
+    --ink-3: rgb(11 14 36 / 0.74);
+    --line: rgb(11 14 36 / 0.24);
+    --surface: var(--pop-ink);
+    --accent: var(--pop-ink);
+    --ia: #ff7445;
+    --ops: #34d8c4;
+    --dev: #b9a8ff;
+    --net: #f6c64f;
+    --shadow: none;
+    display: grid;
+    gap: 2.25rem;
+    align-content: start;
+    padding: 1.5rem;
+    border-radius: 1.75rem;
+    background: var(--pop);
+    color: var(--ink);
+    transform-origin: 50% 0;
+    overflow: hidden;
+  }
+
+  @media (min-width: 48rem) {
+    .panel {
+      padding: 2.5rem;
+      border-radius: 2.25rem;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .panel {
+      grid-template-columns: minmax(0, 1fr) 21.5rem;
+      column-gap: 3.5rem;
+      align-content: stretch;
+      padding: 2.75rem 3rem;
+    }
+  }
+
+  .panel[data-pop="teal"] { --pop: var(--pop-teal); }
+  .panel[data-pop="lilac"] { --pop: var(--pop-lilac); }
+  .panel[data-pop="yellow"] { --pop: var(--pop-yellow); }
+  .panel[data-pop="orange"] { --pop: var(--pop-orange); }
+  .panel[data-pop="cream"] { --pop: var(--pop-cream); }
+
+  .panel-main {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .panel-title {
+    margin-top: 0.9rem;
+    font-size: clamp(2rem, 4.2vw, 3.5rem);
+    line-height: 0.94;
+    letter-spacing: -0.02em;
+    max-width: 16ch;
+  }
+
+  .panel-sum {
+    margin-top: 1.1rem;
+    max-width: 60ch;
+    font-size: 1.06rem;
+    line-height: 1.5;
+    color: var(--ink-2);
+    text-wrap: pretty;
+  }
+
+  .panel-points {
+    margin-top: 1.1rem;
+    max-width: 62ch;
+    font-size: 0.98rem;
+    line-height: 1.45;
+    color: var(--ink-2);
+  }
+
+  .panel-points > li + li {
+    margin-top: 0.4rem;
+  }
+
+  .panel .layer {
+    border-color: transparent;
+    color: var(--pop-cream);
+  }
+
+  .panel .layer-tech {
+    color: rgb(245 240 227 / 0.72);
+  }
+
+  .panel .btn-quiet {
+    border-color: var(--pop-ink);
+    background: var(--pop-ink);
+    color: var(--pop-cream);
+  }
+
+  .panel .btn-quiet:hover {
+    background: color-mix(in oklab, var(--pop-ink) 84%, var(--pop));
+  }
+
+  /* Liste des autres projets */
+  .row {
+    position: relative;
+    display: grid;
+    gap: 0.6rem 2rem;
+    padding-block: 1.6rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .row::before {
+    content: "";
+    position: absolute;
+    top: -1px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.6s var(--ease-out-quint);
+  }
+
+  .row:hover::before,
+  .row:focus-within::before {
+    transform: scaleX(1);
+  }
+
+  .row-title {
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-variation-settings: "wght" 750, "wdth" 80, "opsz" 96;
+    transition: transform 0.5s var(--ease-out-quint), color 0.3s;
+  }
+
+  .row:hover .row-title {
+    transform: translateX(0.5rem);
+    color: var(--accent);
+  }
+
+  @media (min-width: 64rem) {
+    .row {
+      grid-template-columns: 6.5rem minmax(0, 0.9fr) minmax(0, 1.25fr) 16.5rem;
+      align-items: start;
+      padding-block: 2rem;
+    }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Final : aplat orange et vie en fond                                 */
+  /* ------------------------------------------------------------------ */
+
+  .finale {
+    --bg: var(--pop-orange);
+    --ink: var(--pop-ink);
+    --ink-2: rgb(11 14 36 / 0.84);
+    --ink-3: rgb(11 14 36 / 0.74);
+    --line: rgb(11 14 36 / 0.26);
+    --surface: #ff8d68;
+    --accent: var(--pop-ink);
+    --on-accent: var(--pop-cream);
+    --life-born: rgb(11 14 36 / 0.42);
+    --life-alive: rgb(11 14 36 / 0.13);
+    --life-ghost: rgb(11 14 36 / 0.05);
+    position: relative;
+    overflow: hidden;
+    border-radius: 2rem 2rem 0 0;
+    background: var(--bg);
+    color: var(--ink);
+  }
+
+  @media (min-width: 48rem) {
+    .finale {
+      border-radius: 3rem 3rem 0 0;
+    }
+  }
+
+  .finale-inner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 100svh;
+    padding-top: 5rem;
+    padding-bottom: 1.75rem;
+  }
+
+  .finale-title {
+    font-size: clamp(2.9rem, 9vw, 8rem);
+    line-height: 0.88;
+    max-width: 13ch;
+  }
+
+  .finale .email {
+    font-size: clamp(1.25rem, 5.4vw, 4.2rem);
+    font-variation-settings: "wght" 750, "wdth" 78, "opsz" 96;
+    text-decoration-thickness: 3px;
+    text-decoration-color: var(--ink);
   }
 }
 
