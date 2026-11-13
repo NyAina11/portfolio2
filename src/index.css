@@ -23,6 +23,7 @@
 
   --font-sans: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Martian Mono Variable", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --font-display: "Fraunces Variable", ui-serif, Georgia, "Times New Roman", serif;
 
   --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -172,19 +173,32 @@
   /* Typographie                                                         */
   /* ------------------------------------------------------------------ */
 
-  /* Titres : Bricolage Grotesque serrée et grasse, pilotée par ses axes variables. */
+  /*
+   * Titres et grands textes : Fraunces, une serif variable à quatre axes.
+   * « SOFT » arrondit les terminaisons, « WONK » incline certaines lettres (h, n, m),
+   * la taille optique est fixée à son maximum sur les titres (proportions identiques à toutes les tailles) et s'adapte seule sur les textes courants.
+   */
+  .display,
+  .lead,
+  .scrub,
+  .marquee-item,
+  .row-title,
+  .email {
+    font-family: var(--font-display);
+  }
+
   .display {
     --wght: 800;
-    --wdth: 75;
-    font-variation-settings: "wght" var(--wght), "wdth" var(--wdth), "opsz" 96;
-    letter-spacing: -0.015em;
-    line-height: 0.92;
+    --soft: 100;
+    font-variation-settings: "wght" var(--wght), "SOFT" var(--soft), "WONK" 1, "opsz" 144;
+    letter-spacing: -0.02em;
+    line-height: 0.94;
     text-wrap: balance;
   }
 
   .display-char {
     display: inline-block;
-    font-variation-settings: "wght" var(--wght), "wdth" var(--wdth), "opsz" 96;
+    font-variation-settings: "wght" var(--wght), "SOFT" var(--soft), "WONK" 1, "opsz" 144;
     will-change: opacity, transform;
   }
 
@@ -201,19 +215,19 @@
 
   .h1 {
     font-size: clamp(3.2rem, 19vw, 6.5rem);
-    line-height: 0.88;
-    letter-spacing: -0.012em;
+    line-height: 0.9;
+    letter-spacing: -0.025em;
   }
 
   @supports (font-size: 1cqw) {
     .h1 {
-      font-size: clamp(3.2rem, min(23.9cqw, 26svh), 19rem);
+      font-size: clamp(3rem, min(17.4cqw, 27svh), 19rem);
     }
   }
 
   .h2 {
-    font-size: clamp(3rem, 10vw, 8.5rem);
-    line-height: 0.88;
+    font-size: clamp(2.8rem, 9vw, 7.4rem);
+    line-height: 0.92;
   }
 
   .h3 {
@@ -223,10 +237,10 @@
   }
 
   .lead {
-    font-size: clamp(1.35rem, 2.5vw, 2rem);
-    line-height: 1.28;
-    letter-spacing: -0.015em;
-    font-variation-settings: "wght" 500, "wdth" 88;
+    font-size: clamp(1.3rem, 2.3vw, 1.9rem);
+    line-height: 1.24;
+    letter-spacing: -0.01em;
+    font-variation-settings: "wght" 440, "SOFT" 100, "WONK" 0;
     text-wrap: pretty;
   }
 
@@ -917,8 +931,8 @@
   .email {
     font-size: clamp(1.2rem, 4.4vw, 2.6rem);
     line-height: 1.15;
-    letter-spacing: -0.02em;
-    font-variation-settings: "wght" 650, "wdth" 82;
+    letter-spacing: -0.015em;
+    font-variation-settings: "wght" 560, "SOFT" 100, "WONK" 0;
     overflow-wrap: anywhere;
     text-decoration-thickness: 2px;
   }
@@ -1073,7 +1087,7 @@
     align-items: end;
   }
 
-  @media (min-width: 64rem) {
+  @media (min-width: 72rem) {
     .sec-grid {
       grid-template-columns: minmax(0, 1fr) minmax(0, 26rem);
     }
@@ -1098,10 +1112,10 @@
 
   /* Texte qui s'allume mot à mot au défilement */
   .scrub {
-    font-size: clamp(1.75rem, 4.6vw, 3.9rem);
-    line-height: 1.08;
+    font-size: clamp(1.7rem, 4.1vw, 3.5rem);
+    line-height: 1.12;
     letter-spacing: -0.02em;
-    font-variation-settings: "wght" 650, "wdth" 82, "opsz" 96;
+    font-variation-settings: "wght" 560, "SOFT" 100, "WONK" 1;
   }
 
   .scrub-word {
@@ -1131,9 +1145,9 @@
     gap: 0.35em;
     padding-right: 0.35em;
     font-size: clamp(2.6rem, 8.5vw, 7.5rem);
-    line-height: 1.05;
-    letter-spacing: -0.015em;
-    font-variation-settings: "wght" 800, "wdth" 75, "opsz" 96;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    font-variation-settings: "wght" 700, "SOFT" 100, "WONK" 1;
   }
 
   .marquee-item::after {
@@ -1313,7 +1327,7 @@
     font-size: clamp(1.6rem, 3vw, 2.4rem);
     line-height: 1;
     letter-spacing: -0.02em;
-    font-variation-settings: "wght" 750, "wdth" 80, "opsz" 96;
+    font-variation-settings: "wght" 640, "SOFT" 100, "WONK" 1;
     transition: transform 0.5s var(--ease-out-quint), color 0.3s;
   }
 
@@ -1376,7 +1390,7 @@
 
   .finale .email {
     font-size: clamp(1.25rem, 5.4vw, 4.2rem);
-    font-variation-settings: "wght" 750, "wdth" 78, "opsz" 96;
+    font-variation-settings: "wght" 640, "SOFT" 100, "WONK" 0;
     text-decoration-thickness: 3px;
     text-decoration-color: var(--ink);
   }

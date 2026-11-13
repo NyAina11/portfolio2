@@ -10,20 +10,21 @@ interface AxisTextProps {
 }
 
 const letter: Variants = {
-  hidden: {opacity: 0, y: '0.2em', '--wght': 200, '--wdth': 84} as never,
+  hidden: {opacity: 0, y: '0.2em', '--wght': 200, '--soft': 0} as never,
   show: {
     opacity: 1,
     y: '0em',
     '--wght': 800,
-    '--wdth': 75,
+    '--soft': 100,
     transition: {duration: 0.85, ease: [0.22, 1, 0.36, 1]},
   } as never,
 };
 
 /**
- * Titre dont chaque lettre passe de fine à grasse et serrée : l'animation joue sur
- * les axes variables de la police, pas sur un simple fondu. L'état de départ reste
- * plus étroit que l'état final, pour que le titre ne déborde jamais de sa colonne.
+ * Titre dont chaque lettre passe de fine et pointue à grasse et arrondie : l'animation
+ * joue sur les axes variables de la police (graisse et « SOFT »), pas sur un simple
+ * fondu. L'état de départ est plus étroit que l'état final, donc le titre ne déborde
+ * jamais de sa colonne pendant l'animation.
  */
 export function AxisText({text, trigger = 'view', delay = 0, stagger = 0.03}: AxisTextProps) {
   const reduced = useReducedMotion();

@@ -77,7 +77,7 @@ src/
 - **Mise en scène** : le hero est épinglé et la suite de la page glisse par-dessus comme une feuille. Les projets sont des panneaux de couleur qui s'empilent au défilement. La page se termine sur un aplat orange.
 - **Vocabulaire** : nœuds, câbles et impulsions, repris des outils d'automatisation et des pipelines, pour les démonstrations, les compétences et les schémas d'architecture.
 - **Couleurs** : nuit indigo et encre vanille, plus quatre couleurs qui codent chacune un domaine (IA et automatisation, DevOps, développement, réseaux et sécurité). Un thème clair est disponible.
-- **Typographie** : Bricolage Grotesque (variable : graisse, largeur, taille optique) pour les titres et le texte, Martian Mono pour les repères et le journal d'exécution. Les deux polices sont embarquées, sans appel à un service externe.
+- **Typographie** : Fraunces pour les titres et les grands textes, une serif variable à quatre axes (graisse, taille optique, « SOFT » qui arrondit les terminaisons, « WONK » qui incline certaines lettres). Bricolage Grotesque pour le texte courant, Martian Mono pour les repères et le journal d'exécution. Les trois polices sont embarquées, sans appel à un service externe. Pour changer la police des titres, modifier `--font-display` dans `src/index.css`, l'import dans `src/main.tsx` et les réglages `font-variation-settings` de la section « Typographie ».
 - **Accessibilité** : navigation au clavier, contrastes AA dans les deux thèmes, bouton de pause pour le fond animé. Si le système demande un mouvement réduit, les animations sont coupées, le fond est figé et le défilement redevient natif.
 
 ## Technologies
