@@ -1,13 +1,58 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Google AI Studio App</title>
+    <title>Ny Aina Rakotonirina, développeur fullstack et DevOps</title>
+    <meta
+      name="description"
+      content="Portfolio de Ny Aina Rakotonirina, développeur fullstack et DevOps à Madagascar : agents IA, automatisation n8n, Docker, CI/CD et Kubernetes."
+    />
+    <meta name="author" content="Ny Aina Rakotonirina" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#0b0e24" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:title" content="Ny Aina Rakotonirina, développeur fullstack et DevOps" />
+    <meta
+      property="og:description"
+      content="Je construis des applications, je les automatise avec des agents IA et je les mets en production."
+    />
+    <!-- Adresse du site en ligne : à mettre à jour si le domaine change. -->
+    <meta property="og:url" content="https://nyaina-ten.vercel.app/" />
+    <meta property="og:image" content="https://nyaina-ten.vercel.app/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Ny Aina Rakotonirina",
+        "jobTitle": "Développeur fullstack et DevOps",
+        "address": {"@type": "PostalAddress", "addressCountry": "MG"},
+        "sameAs": ["https://github.com/NyAina11", "https://linkedin.com/in/ny-aina-rak"],
+        "knowsAbout": ["Agents IA", "n8n", "Docker", "Kubernetes", "CI/CD", "React", "Node.js", "Python"]
+      }
+    </script>
+    <script>
+      // Applique le thème enregistré avant le premier rendu, pour éviter un flash.
+      try {
+        var saved = localStorage.getItem('theme');
+        if (saved === 'light' || saved === 'dark') document.documentElement.dataset.theme = saved;
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <p style="font-family: system-ui, sans-serif; padding: 2rem; color: #f5f0e3">
+        Ny Aina Rakotonirina, développeur fullstack et DevOps. Ce portfolio a besoin de JavaScript pour s’afficher.
+        Mes projets sont aussi sur <a href="https://github.com/NyAina11" style="color: #ff6b3d">GitHub</a>.
+      </p>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-
